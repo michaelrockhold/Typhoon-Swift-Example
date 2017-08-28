@@ -11,85 +11,97 @@
 
 import Foundation
 
-public class ThemeAssembly : TyphoonAssembly {
+open class ThemeAssembly : TyphoonAssembly {
     
 
     /**
      * Current-theme is emitted from the theme-factory, which increments the theme on each run of the application.
      */
-    public dynamic func currentTheme() -> AnyObject {
+    open dynamic func currentTheme() -> Any {
 
-        return TyphoonDefinition.withFactory(self.themeFactory(), selector: "sequentialTheme")
+        return TyphoonDefinition.withFactory(self.themeFactory(), selector: #selector(ThemeFactory.sequentialTheme))
     }
 
     /**
     * The theme factory contains a collection of each theme. Individual themes are using Typhoon's type-converter system to convert the
     * string representation of properties to their required runtime type.
     */
-    public dynamic func themeFactory() -> AnyObject {
-        return TyphoonDefinition.withClass(ThemeFactory.self) {
-            (definition) in
+    open dynamic func themeFactory() -> Any {
+        return TyphoonDefinition.withClass(ThemeFactory.self) { definition in
+            guard let d = definition else {
+                fatalError("TyphoonDefinition object creation error")
+            }
 
-            definition.useInitializer("initWithThemes:") {
-                (initializer) in
-                
-                initializer.injectParameterWith([
+            d.useInitializer(#selector(ThemeFactory.init(themes:))) { initializer in
+                guard let i = initializer else {
+                    fatalError("TyphoonDefinition object creation error")
+                }
+
+                i.injectParameter(with: [
                     self.cloudsOverTheCityTheme(),
                     self.lightsInTheRainTheme(),
                     self.beachTheme(),
                     self.sunsetTheme()
                     ])
             }
-            definition.scope = TyphoonScope.Singleton
+            d.scope = TyphoonScope.singleton
         }
     }
 
 
-    public dynamic func cloudsOverTheCityTheme() -> AnyObject {
-        return TyphoonDefinition.withClass(Theme.self) {
-            (definition) in
+    open dynamic func cloudsOverTheCityTheme() -> Any {
+        return TyphoonDefinition.withClass(Theme.self) { definition in
+            guard let d = definition else {
+                fatalError("TyphoonDefinition object creation error")
+            }
 
-                definition.injectProperty("backgroundResourceName", with:"bg3.png")
-                definition.injectProperty("navigationBarColor", with:UIColor(hexRGB:0x641d23))
-                definition.injectProperty("forecastTintColor", with:UIColor(hexRGB:0x641d23))
-                definition.injectProperty("controlTintColor", with:UIColor(hexRGB:0x7f9588))
+            d.injectProperty(#selector(getter: Theme.backgroundResourceName), with:"bg3.png")
+            d.injectProperty(#selector(getter: Theme.navigationBarColor), with:UIColor(hexRGB:0x641d23))
+            d.injectProperty(#selector(getter: Theme.forecastTintColor), with:UIColor(hexRGB:0x641d23))
+            d.injectProperty(#selector(getter: Theme.controlTintColor), with:UIColor(hexRGB:0x7f9588))
         }
     }
 
 
-    public dynamic func lightsInTheRainTheme() -> AnyObject {
-        return TyphoonDefinition.withClass(Theme.self) {
-            (definition) in
+    open dynamic func lightsInTheRainTheme() -> Any {
+        return TyphoonDefinition.withClass(Theme.self) { definition in
+            guard let d = definition else {
+                fatalError("TyphoonDefinition object creation error")
+            }
 
-                definition.injectProperty("backgroundResourceName", with:"bg4.png")
-                definition.injectProperty("navigationBarColor", with:UIColor(hexRGB:0xeaa53d))
-                definition.injectProperty("forecastTintColor", with:UIColor(hexRGB:0x722d49))
-                definition.injectProperty("controlTintColor", with:UIColor(hexRGB:0x722d49))
+            d.injectProperty(#selector(getter: Theme.backgroundResourceName), with:"bg4.png")
+            d.injectProperty(#selector(getter: Theme.navigationBarColor), with:UIColor(hexRGB:0xeaa53d))
+            d.injectProperty(#selector(getter: Theme.forecastTintColor), with:UIColor(hexRGB:0x722d49))
+            d.injectProperty(#selector(getter: Theme.controlTintColor), with:UIColor(hexRGB:0x722d49))
         }
 
     }
 
 
-    public dynamic func beachTheme() -> AnyObject {
-        return TyphoonDefinition.withClass(Theme.self) {
-            (definition) in
+    open dynamic func beachTheme() -> Any {
+        return TyphoonDefinition.withClass(Theme.self) { definition in
+            guard let d = definition else {
+                fatalError("TyphoonDefinition object creation error")
+            }
 
-                definition.injectProperty("backgroundResourceName", with:"bg5.png")
-                definition.injectProperty("navigationBarColor", with:UIColor(hexRGB:0x37b1da))
-                definition.injectProperty("forecastTintColor", with:UIColor(hexRGB:0x37b1da))
-                definition.injectProperty("controlTintColor", with:UIColor(hexRGB:0x0043a6))
+            d.injectProperty(#selector(getter: Theme.backgroundResourceName), with:"bg5.png")
+            d.injectProperty(#selector(getter: Theme.navigationBarColor), with:UIColor(hexRGB:0x37b1da))
+            d.injectProperty(#selector(getter: Theme.forecastTintColor), with:UIColor(hexRGB:0x37b1da))
+            d.injectProperty(#selector(getter: Theme.controlTintColor), with:UIColor(hexRGB:0x0043a6))
         }
 
     }
 
-    public dynamic func sunsetTheme() -> AnyObject {
-        return TyphoonDefinition.withClass(Theme.self) {
-            (definition) in
+    open dynamic func sunsetTheme() -> Any {
+        return TyphoonDefinition.withClass(Theme.self) { definition in
+            guard let d = definition else {
+                fatalError("TyphoonDefinition object creation error")
+            }
 
-                definition.injectProperty("backgroundResourceName", with:"sunset.png")
-                definition.injectProperty("navigationBarColor", with:UIColor(hexRGB:0x0a1d3b))
-                definition.injectProperty("forecastTintColor", with:UIColor(hexRGB:0x0a1d3b))
-                definition.injectProperty("controlTintColor", with:UIColor(hexRGB:0x606970))
+            d.injectProperty(#selector(getter: Theme.backgroundResourceName), with:"sunset.png")
+            d.injectProperty(#selector(getter: Theme.navigationBarColor), with:UIColor(hexRGB:0x0a1d3b))
+            d.injectProperty(#selector(getter: Theme.forecastTintColor), with:UIColor(hexRGB:0x0a1d3b))
+            d.injectProperty(#selector(getter: Theme.controlTintColor), with:UIColor(hexRGB:0x606970))
         }
     }
     

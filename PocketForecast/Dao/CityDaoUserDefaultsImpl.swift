@@ -11,9 +11,9 @@
 
 import Foundation
 
-public class CityDaoUserDefaultsImpl : NSObject, CityDao {
+open class CityDaoUserDefaultsImpl : NSObject, CityDao {
     
-    var defaults : NSUserDefaults
+    var defaults : UserDefaults
     let citiesListKey = "pfWeather.cities"
     let currentCityKey = "pfWeather.currentCityKey"
     
@@ -26,27 +26,27 @@ public class CityDaoUserDefaultsImpl : NSObject, CityDao {
     ]
     
     
-    init(defaults : NSUserDefaults) {
+    init(defaults : UserDefaults) {
         self.defaults = defaults
     }
     
-    public func listAllCities() -> [AnyObject]! {
+    open func listAllCities() -> [String]! {
         
-        var cities : NSArray? = self.defaults.arrayForKey(self.citiesListKey)
+        var cities = self.defaults.array(forKey: self.citiesListKey)
         if (cities == nil) {
-            cities = defaultCities;
-            self.defaults.setObject(cities, forKey:self.citiesListKey)
+            cities = defaultCities
+            self.defaults.set(cities, forKey:self.citiesListKey)
         }
-        return (cities as! [String]).sort {
+        return (cities as! [String]).sorted {
             return $0 < $1
         }
     }
     
-    public func saveCity(name: String!) {
+    open func saveCity(_ name: String!) {
 
-        let trimmedName = name.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceAndNewlineCharacterSet())
+        let trimmedName = name.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
         
-        var savedCities : Array? = self.defaults.arrayForKey(self.citiesListKey)
+        var savedCities : Array? = self.defaults.array(forKey: self.citiesListKey)
         if (savedCities == nil) {
             savedCities = defaultCities
         }
@@ -55,51 +55,51 @@ public class CityDaoUserDefaultsImpl : NSObject, CityDao {
         
         var canAddCity = true
         for city in cities {
-            if (city.lowercaseString == trimmedName.lowercaseString) {
+            if ((city as AnyObject).lowercased == trimmedName.lowercased()) {
                 canAddCity = false
             }
         }
         if (canAddCity) {
-            cities.addObject(trimmedName)
-            self.defaults.setObject(cities, forKey: self.citiesListKey)
+            cities.add(trimmedName)
+            self.defaults.set(cities, forKey: self.citiesListKey)
         }
     }
     
-    public func deleteCity(name: String!) {
+    open func deleteCity(_ name: String!) {
         
-        let trimmedName = name.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceAndNewlineCharacterSet())
-        let cities = NSMutableArray(array: self.defaults.arrayForKey(self.citiesListKey)!)
+        let trimmedName = name.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
+        let cities = NSMutableArray(array: self.defaults.array(forKey: self.citiesListKey)!)
         var cityToRemove : String?
         for city in cities {
-            if (city.lowercaseString == trimmedName.lowercaseString) {
+            if ((city as AnyObject).lowercased == trimmedName.lowercased()) {
                 cityToRemove = city as? String
             }
         }
         if (cityToRemove != nil)
         {
-            cities.removeObject(cityToRemove!)
+            cities.remove(cityToRemove!)
         }
 
-        self.defaults.setObject(cities, forKey: self.citiesListKey)
+        self.defaults.set(cities, forKey: self.citiesListKey)
     }
     
-    public func saveCurrentlySelectedCity(cityName: String!) {
+    open func saveCurrentlySelectedCity(_ cityName: String!) {
         
-        let trimmed = cityName.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceAndNewlineCharacterSet())
+        let trimmed = cityName.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
         if (!trimmed.isEmpty) {
-            self.defaults.setObject(trimmed, forKey: self.currentCityKey)
+            self.defaults.set(trimmed, forKey: self.currentCityKey)
         }
     }
     
     
-    public func clearCurrentlySelectedCity() {
+    open func clearCurrentlySelectedCity() {
         
-        self.defaults.setObject(nil, forKey: self.currentCityKey)
+        self.defaults.set(nil, forKey: self.currentCityKey)
         
     }
     
-    public func loadSelectedCity() -> String? {
-        return self.defaults.objectForKey(self.currentCityKey) as? String
+    open func loadSelectedCity() -> String? {
+        return self.defaults.object(forKey: self.currentCityKey) as? String
     }
 
     

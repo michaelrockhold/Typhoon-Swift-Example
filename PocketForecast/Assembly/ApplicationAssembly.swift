@@ -9,7 +9,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-public class ApplicationAssembly: TyphoonAssembly {
+open class ApplicationAssembly: TyphoonAssembly {
 
     //-------------------------------------------------------------------------------------------
     // MARK: - Bootstrapping
@@ -20,20 +20,21 @@ public class ApplicationAssembly: TyphoonAssembly {
      * These are modules - assemblies collaborate to provie components to this one.  At runtime you
      * can instantiate Typhoon with any assembly tha satisfies the module interface.
      */
-    public var coreComponents: CoreComponents!
-    public var themeAssembly: ThemeAssembly!
+    open var coreComponents: CoreComponents!
+    open var themeAssembly: ThemeAssembly!
 
 
     /* 
      * This is the definition for our AppDelegate. Typhoon will inject the specified properties 
      * at application startup. 
      */
-    public dynamic func appDelegate() -> AnyObject {
-        return TyphoonDefinition.withClass(AppDelegate.self) {
-            (definition) in
-
-            definition.injectProperty("cityDao", with: self.coreComponents.cityDao())
-            definition.injectProperty("rootViewController", with: self.rootViewController())
+    open dynamic func appDelegate() -> Any {
+        return TyphoonDefinition.withClass(AppDelegate.self) { definition in
+            guard let d = definition else {
+                fatalError("TyphoonDefinition object creation error")
+            }
+            d.injectProperty(#selector(getter: AppDelegate.cityDao), with: self.coreComponents.cityDao())
+            d.injectProperty(#selector(getter: AppDelegate.rootViewController), with: self.rootViewController())
         }
     }
 
@@ -41,9 +42,9 @@ public class ApplicationAssembly: TyphoonAssembly {
     /*
      * A config definition, referencing properties that will be loaded from a plist. 
      */
-    public dynamic func config() -> AnyObject {
+    open dynamic func config() -> AnyObject {
 
-        return TyphoonDefinition.configDefinitionWithName("Configuration.plist")
+        return TyphoonDefinition.configDefinition(withName: "Configuration.plist")
     }
 
 
@@ -51,88 +52,95 @@ public class ApplicationAssembly: TyphoonAssembly {
     // MARK: - Main Assembly
     //-------------------------------------------------------------------------------------------
 
-    public dynamic func rootViewController() -> AnyObject {
-        return TyphoonDefinition.withClass(RootViewController.self) {
-            (definition) in
-
-            definition.useInitializer("initWithMainContentViewController:assembly:") {
-                (initializer) in
-
-                initializer.injectParameterWith(self.weatherReportController())
-                initializer.injectParameterWith(self)
+    open dynamic func rootViewController() -> Any {
+        return TyphoonDefinition.withClass(RootViewController.self) { definition in
+            guard let d = definition else {
+                fatalError("TyphoonDefinition object creation error")
             }
-            definition.scope = TyphoonScope.Singleton
+            d.useInitializer(#selector(RootViewController.init(mainContentViewController:assembly:))) { initializer in
+                guard let i = initializer else {
+                    fatalError("TyphoonDefinition object creation error")
+                }
+                i.injectParameter(with: self.weatherReportController())
+                i.injectParameter(with: self)
+            }
+            d.scope = TyphoonScope.singleton
         }
     }
 
-    public dynamic func citiesListController() -> AnyObject {
+    open dynamic func citiesListController() -> Any {
 
-        return TyphoonDefinition.withClass(CitiesListViewController.self) {
-            (definition) in
-
-            definition.useInitializer("initWithCityDao:theme:") {
-                (initializer) in
-
-                initializer.injectParameterWith(self.coreComponents.cityDao())
-                initializer.injectParameterWith(self.themeAssembly.currentTheme())
+        return TyphoonDefinition.withClass(CitiesListViewController.self) { definition in
+            guard let d = definition else {
+                fatalError("TyphoonDefinition object creation error")
             }
-            definition.injectProperty("assembly")
+
+            d.useInitializer(#selector(CitiesListViewController.init(cityDao:theme:))) { initializer in
+                guard let i = initializer else {
+                    fatalError("TyphoonDefinition object creation error")
+                }
+
+                i.injectParameter(with: self.coreComponents.cityDao())
+                i.injectParameter(with: self.themeAssembly.currentTheme())
+            }
+            d.injectProperty(#selector(getter: CitiesListViewController.assembly))
         }
 
     }
 
 
-    public dynamic func weatherReportController() -> AnyObject {
+    open dynamic func weatherReportController() -> Any {
 
-        return TyphoonDefinition.withClass(WeatherReportViewController.self) {
-            (definition) in
+        return TyphoonDefinition.withClass(WeatherReportViewController.self) { definition in
+            guard let d = definition else {
+                fatalError("TyphoonDefinition object creation error")
+            }
 
-            definition.useInitializer("initWithView:weatherClient:weatherReportDao:cityDao:assembly:") {
-                (initializer) in
+            d.useInitializer(#selector(WeatherReportViewController.init(view:weatherClient:weatherReportDao:cityDao:assembly:))) { initializer in
+                guard let i = initializer else {
+                    fatalError("TyphoonDefinition object creation error")
+                }
 
-                initializer.injectParameterWith(self.weatherReportView())
-                initializer.injectParameterWith(self.coreComponents.weatherClient())
-                initializer.injectParameterWith(self.coreComponents.weatherReportDao())
-                initializer.injectParameterWith(self.coreComponents.cityDao())
-                initializer.injectParameterWith(self)
+                i.injectParameter(with: self.weatherReportView())
+                i.injectParameter(with: self.coreComponents.weatherClient())
+                i.injectParameter(with: self.coreComponents.weatherReportDao())
+                i.injectParameter(with: self.coreComponents.cityDao())
+                i.injectParameter(with: self)
 
             }
         };
     }
 
-    public dynamic func weatherReportView() -> AnyObject {
+    open dynamic func weatherReportView() -> Any {
 
         return TyphoonDefinition.withClass(WeatherReportView.self) {
             (definition) in
 
-            definition.injectProperty("theme", with: self.themeAssembly.currentTheme())
+            definition!.injectProperty(#selector(getter: WeatherReportView.theme), with: self.themeAssembly.currentTheme())
         }
     }
 
-    public dynamic func addCityViewController() -> AnyObject {
+    open dynamic func addCityViewController() -> Any {
 
-        return TyphoonDefinition.withClass(AddCityViewController.self) {
-            (definition) in
+        return TyphoonDefinition.withClass(AddCityViewController.self) { definition in
+            
+            guard let d = definition else {
+                fatalError("TyphoonDefinition object creation error")
+            }
 
             // TODO: Seems sub-class MUST override this initializer otherwise it can't be
             // TODO: invoked in RELEASE configuration. Bug?
-            definition.useInitializer("initWithNibName:bundle:") {
-                (initializer) in
+            d.useInitializer(#selector(AddCityViewController.init(nibName:bundle:))) { initializer in
 
-                initializer.injectParameterWith("AddCity")
-                initializer.injectParameterWith(NSBundle.mainBundle())
+                initializer!.injectParameter(with: "AddCity")
+                initializer!.injectParameter(with: Bundle.main)
             }
 
 
-
-            definition.injectProperty("cityDao", with: self.coreComponents.cityDao())
-            definition.injectProperty("weatherClient", with: self.coreComponents.weatherClient())
-            definition.injectProperty("theme", with: self.themeAssembly.currentTheme())
-            definition.injectProperty("rootViewController", with: self.rootViewController())
+            d.injectProperty(#selector(getter: AddCityViewController.cityDao), with: self.coreComponents.cityDao())
+            d.injectProperty(#selector(getter: AddCityViewController.weatherClient), with: self.coreComponents.weatherClient())
+            d.injectProperty(#selector(getter: AddCityViewController.theme), with: self.themeAssembly.currentTheme())
+            d.injectProperty(#selector(getter: AddCityViewController.rootViewController), with: self.rootViewController())
         }
-
-
     }
-
-
 }
